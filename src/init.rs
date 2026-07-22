@@ -87,7 +87,7 @@ pub fn init() -> Result<repository::Repository, InitError> {
 
     let base_folder = Path::new(".jims").to_path_buf();
 
-    let subfolders = vec!["objects", "refs/heads", "refs/tags"];
+    let subfolders = vec!["objects", "refs/heads", "refs/tags", "branches"];
 
     let folders_creation_result = create_folders(base_folder.as_path(), subfolders);
     if let Err(err) = folders_creation_result {
@@ -98,7 +98,6 @@ pub fn init() -> Result<repository::Repository, InitError> {
         ("HEAD", "ref: refs/heads/master\n"), 
         ("description", "Unnamed repository; edit this file 'description' to name the repository\n"),
     ];
-
     let files_creation_result = create_files(base_folder.as_path(), files);
     if let Err(err) = files_creation_result {
         return Err(err)
