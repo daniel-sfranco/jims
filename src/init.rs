@@ -1,4 +1,6 @@
-use std::{fs, path::Path};
+use std::{fs, path::Path, env};
+
+use crate::repository;
 
 #[derive(Debug)]
 pub enum InitError {
@@ -7,7 +9,7 @@ pub enum InitError {
 
 impl InitError {
     fn from_path(path: &str, message: String) -> Self {
-        Self::OS(format!("Error creating the path {path}: {message}"))
+        Self::OS(format!("Error resolving the path {path}: {message}"))
     }
 
 }
@@ -61,12 +63,17 @@ fn create_files(base_folder: &Path, files: Vec<(&str, &str)>) -> Result<(), Init
 }
 
 
-pub fn init() -> Result<(), InitError> {
-    let base_folder = Path::new(".jims");
+pub fn init() -> Result<repository::Repository, InitError> {
+    let act_folder = match env::current_dir() {
+        Ok(path) => path,
+        Err(err) => return Err(InitError::from_path(".", err.to_string()))
+    };
+
+    let base_folder = Path::new(".jims").to_path_buf();
 
     let subfolders = vec!["objects", "refs/heads", "refs/tags"];
 
-    let folders_creation_result = create_folders(base_folder, subfolders);
+    let folders_creation_result = create_folders(base_folder.as_path(), subfolders);
     if let Err(err) = folders_creation_result {
         return Err(err)
     }
@@ -77,10 +84,16 @@ pub fn init() -> Result<(), InitError> {
         ("config", "[core]\n    repositoryformatversion = 0\n    filemode = false\n    bare = false\n")
     ];
 
-    let files_creation_result = create_files(base_folder, files);
+    let files_creation_result = create_files(base_folder.as_path(), files);
     if let Err(err) = files_creation_result {
         return Err(err)
     }
 
-    Ok(())
+    let repository = repository::Repository {
+        worktree: act_folder,
+        dir: base_folder,
+        conf: "yay".to_string()
+    };
+
+    Ok(repository)
 }

@@ -1,6 +1,7 @@
 use std::env;
 
 mod init;
+mod repository;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
