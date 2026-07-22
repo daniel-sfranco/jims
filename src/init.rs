@@ -30,11 +30,8 @@ fn create_file(file: (&str, &str)) -> Result<(), InitError> {
 }
 
 
-pub fn init() -> Result<(), InitError> {
-    let base_folder = Path::new(".jims");
-
-    let subfolders = vec!["objects", "refs/heads", "refs/tags"];
-    for sub in subfolders {
+fn create_folders(base_folder: &Path, folders: Vec<&str>) -> Result<(), InitError> {
+    for sub in folders {
         let joined_path = base_folder.join(sub);
         let path = joined_path.to_str();
         if let None = path {
@@ -45,12 +42,10 @@ pub fn init() -> Result<(), InitError> {
             return Err(err)
         }
     }
+    Ok(())
+}
 
-    let files: Vec<(&str, &str)> = vec![
-        ("HEAD", "ref: refs/heads/master\n"), 
-        ("description", "Unnamed repository; edit this file 'description' to name the repository\n"),
-        ("config", "[core]\n    repositoryformatversion = 0\n    filemode = false\n    bare = false\n")
-    ];
+fn create_files(base_folder: &Path, files: Vec<(&str, &str)>) -> Result<(), InitError> {
     for file in files {
         let joined_path = base_folder.join(file.0);
         let path = joined_path.to_str();
@@ -62,5 +57,30 @@ pub fn init() -> Result<(), InitError> {
             return Err(err)
         }
     }
+    Ok(())
+}
+
+
+pub fn init() -> Result<(), InitError> {
+    let base_folder = Path::new(".jims");
+
+    let subfolders = vec!["objects", "refs/heads", "refs/tags"];
+
+    let folders_creation_result = create_folders(base_folder, subfolders);
+    if let Err(err) = folders_creation_result {
+        return Err(err)
+    }
+
+    let files: Vec<(&str, &str)> = vec![
+        ("HEAD", "ref: refs/heads/master\n"), 
+        ("description", "Unnamed repository; edit this file 'description' to name the repository\n"),
+        ("config", "[core]\n    repositoryformatversion = 0\n    filemode = false\n    bare = false\n")
+    ];
+
+    let files_creation_result = create_files(base_folder, files);
+    if let Err(err) = files_creation_result {
+        return Err(err)
+    }
+
     Ok(())
 }
