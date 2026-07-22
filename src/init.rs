@@ -1,4 +1,4 @@
-use std::{fs, path::Path, env};
+use std::{fs, path::Path};
 use configparser::ini;
 
 use crate::repository;
@@ -79,13 +79,15 @@ fn create_config(path: &Path) -> Result<ini::Ini, InitError> {
 }
 
 
-pub fn init() -> Result<repository::Repository, InitError> {
-    let act_folder = match env::current_dir() {
-        Ok(path) => path,
-        Err(err) => return Err(InitError::from_path(".", err.to_string()))
-    };
+pub fn init(path: &str) -> Result<repository::Repository, InitError> {
+    if path.len() == 0 {
+        return Err(InitError::from_path("", "Too much parameters were passed! \n
+        jims init has only one optional parameter, the path for the project you are creating".to_string()))
+    }
 
-    let base_folder = Path::new(".jims").to_path_buf();
+    let act_folder = Path::new(&path);
+
+    let base_folder = act_folder.join(".jims").to_path_buf();
 
     let subfolders = vec!["objects", "refs/heads", "refs/tags", "branches"];
 
@@ -109,7 +111,7 @@ pub fn init() -> Result<repository::Repository, InitError> {
     }
 
     let repository = repository::Repository {
-        worktree: act_folder,
+        worktree: act_folder.to_path_buf(),
         dir: base_folder,
         conf: conf.unwrap()
     };

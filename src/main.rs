@@ -3,6 +3,14 @@ use std::env;
 mod init;
 mod repository;
 
+fn cmd_init(args: Vec<String>) -> Result<repository::Repository, init::InitError>{
+    match args.len() {
+        1 => init::init("./"),
+        2 => init::init(args[1].as_str()),
+        _ => init::init("")
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     // args.push(String::from("init")); // just for vs code debug
@@ -11,7 +19,7 @@ fn main() {
     }
     let query = args[1].as_str();
     let output = match query {
-        "init" => init::init(),
+        "init" => cmd_init(args[1..].to_vec()),
         _ => panic!("Query not recognized! Try one of the following: init"),
     };
     if let Err(init::InitError::OS(error)) = &output {
