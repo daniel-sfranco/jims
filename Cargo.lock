@@ -3,5 +3,14 @@
 version = 4
 
 [[package]]
+name = "configparser"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b46dec724fd22199ebde05033a0cbae453bc3b1ecff11eb6a6bb3eec4b90c6a4"
+
+[[package]]
 name = "jims"
 version = "0.1.0"
+dependencies = [
+ "configparser",
+]

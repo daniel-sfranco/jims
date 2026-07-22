@@ -1,4 +1,5 @@
 use std::{fs, path::Path, env};
+use configparser::ini;
 
 use crate::repository;
 
@@ -62,6 +63,21 @@ fn create_files(base_folder: &Path, files: Vec<(&str, &str)>) -> Result<(), Init
     Ok(())
 }
 
+fn create_config(path: &Path) -> Result<ini::Ini, InitError> {
+    let path = path.join("config");
+    let mut conf = ini::Ini::new();
+
+    conf.set("core", "repositoryformatversion", Some("0".to_string()));
+    conf.set("core", "filemode", Some("false".to_string()));
+    conf.set("core", "bare", Some("false".to_string()));
+
+    if let Err(e) = conf.write(&path) {
+        return Err(InitError::from_path(path.to_str().unwrap(), e.to_string()))
+    }
+
+    Ok(conf)
+}
+
 
 pub fn init() -> Result<repository::Repository, InitError> {
     let act_folder = match env::current_dir() {
@@ -81,7 +97,6 @@ pub fn init() -> Result<repository::Repository, InitError> {
     let files: Vec<(&str, &str)> = vec![
         ("HEAD", "ref: refs/heads/master\n"), 
         ("description", "Unnamed repository; edit this file 'description' to name the repository\n"),
-        ("config", "[core]\n    repositoryformatversion = 0\n    filemode = false\n    bare = false\n")
     ];
 
     let files_creation_result = create_files(base_folder.as_path(), files);
@@ -89,10 +104,15 @@ pub fn init() -> Result<repository::Repository, InitError> {
         return Err(err)
     }
 
+    let conf = create_config(&base_folder);
+    if let Err(err) = conf {
+        return Err(err)
+    }
+
     let repository = repository::Repository {
         worktree: act_folder,
         dir: base_folder,
-        conf: "yay".to_string()
+        conf: conf.unwrap()
     };
 
     Ok(repository)
