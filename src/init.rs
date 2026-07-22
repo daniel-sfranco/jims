@@ -33,7 +33,7 @@ fn create_file(file: (&str, &str)) -> Result<(), InitError> {
 pub fn init() -> Result<(), InitError> {
     let base_folder = Path::new(".jims");
 
-    let subfolders = vec!["objects", "refs"];
+    let subfolders = vec!["objects", "refs/heads", "refs/tags"];
     for sub in subfolders {
         let joined_path = base_folder.join(sub);
         let path = joined_path.to_str();
