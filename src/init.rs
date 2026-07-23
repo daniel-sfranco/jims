@@ -110,11 +110,10 @@ pub fn init(path: &str) -> Result<repository::Repository, InitError> {
         return Err(err)
     }
 
-    let repository = repository::Repository {
-        worktree: act_folder.to_path_buf(),
-        dir: base_folder,
-        conf: conf.unwrap()
-    };
+    match repository::Repository::new(act_folder.to_path_buf()) {
+        Ok(repo) => Ok(repo),
+        Err(err) => Err(InitError::from_path(act_folder.to_str().unwrap(), err.to_string()))
+    }
 
-    Ok(repository)
+
 }
