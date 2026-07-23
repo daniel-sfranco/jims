@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{fs, path::Path, error::Error, fmt};
 use configparser::ini;
 
 use crate::repository;
@@ -9,11 +9,22 @@ pub enum InitError {
 }
 
 impl InitError {
-    fn from_path(path: &str, message: String) -> Self {
+    pub fn from_path(path: &str, message: String) -> Self {
         Self::OS(format!("Error resolving the path {path}: {message}"))
     }
-
 }
+
+impl fmt::Display for InitError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let description = match self {
+            InitError::OS(str) => format!("There was a problem in your OS: {str}"),
+        };
+        let desc_str = description.as_str();
+        f.write_str(desc_str)
+    }
+}
+
+impl Error for InitError {}
 
 fn create_folder(folder_name: &str) -> Result<(), InitError> {
     let creation_result = fs::create_dir_all(folder_name);
